@@ -72,6 +72,13 @@ while ( ($store_name, $store) = each %stores ) {
 			   os_y => 1000 }
 			);
 
+      $wiki->write_node( "21 clone",
+			 "grid point clone",
+			 undef,
+			 { os_x => 2000,
+			   os_y => 1000 }
+			);
+
       pass "$store_name test backend primed with test data";
     }
 }

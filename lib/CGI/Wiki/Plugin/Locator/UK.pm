@@ -3,7 +3,7 @@ package CGI::Wiki::Plugin::Locator::UK;
 use strict;
 
 use vars qw( $VERSION @ISA );
-$VERSION = '0.06';
+$VERSION = '0.07';
 
 use Carp qw( croak );
 use CGI::Wiki::Plugin;
@@ -32,7 +32,7 @@ L<CGI::Wiki>.
 
   my $wiki = CGI::Wiki->new( ... );
   my $locator = CGI::Wiki::Plugin::Locator::UK->new;
-  $wiki->register_plugin( $locator );
+  $wiki->register_plugin( plugin => $locator );
 
   $wiki->write_node( "Jerusalem Tavern",
                      "A good pub",
@@ -206,7 +206,7 @@ sub find_within_distance {
                                     from_os_y => $sy,
 				    to_node   => $result,
 				    unit      => "metres" );
-        if ($dist && $dist <= $metres ) {
+        if ( defined $dist && $dist <= $metres ) {
             push @results, $result;
 	}
     }

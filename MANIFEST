@@ -6,4 +6,5 @@ TODO
 lib/CGI/Wiki/Plugin/Locator/UK.pm
 t/00_setup.t
 t/01_add_test_data.t
-t/locator.t
+t/02_locator.t
+t/03_same_coords_bug.t

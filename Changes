@@ -1,3 +1,7 @@
+0.07    3 September 2003
+        Fixed bug in ->find_within_distance where nodes with identical
+          co-ords weren't being returned.
+
 0.06    9 May 2003
         ->find_within_distance can now optionally take "os_x" and "os_y"
           arguments as an alternative to the "node" argument.
