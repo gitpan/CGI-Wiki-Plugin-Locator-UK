@@ -3,10 +3,12 @@ package CGI::Wiki::Plugin::Locator::UK;
 use strict;
 
 use vars qw( $VERSION @ISA );
-$VERSION = '0.07';
+$VERSION = '0.08';
 
 use Carp qw( croak );
 use CGI::Wiki::Plugin;
+use Geography::NationalGrid;
+use Geography::NationalGrid::GB;
 
 @ISA = qw( CGI::Wiki::Plugin );
 
@@ -163,7 +165,6 @@ if insufficient start point data supplied.
 
 sub find_within_distance {
     my ($self, %args) = @_;
-
     my $store = $self->datastore;
     my $dbh = eval { $store->dbh; }
       or croak "find_within_distance is only implemented for database stores";
@@ -175,6 +176,13 @@ sub find_within_distance {
         ($sx, $sy) = $self->coordinates( node => $args{node} );
     } elsif ( $args{os_x} and $args{os_y} ) {
         ($sx, $sy) = @args{ qw( os_x os_y ) };
+    } elsif ( $args{lat} and $args{long} ) {
+        my $point = Geography::NationalGrid::GB->new(
+                                                      Latitude  => $args{lat},
+                                                      Longitude => $args{long},
+                                                    );
+        $sx = $point->easting;
+        $sy = $point->northing;
     } else {
         croak "Insufficient start location data supplied";
     }
@@ -197,7 +205,6 @@ sub find_within_distance {
     if ( ref $store eq "CGI::Wiki::Store::Pg" ) {
         $sql =~ s/metadata_value/metadata_value::integer/gs;
     }
-
     my $sth = $dbh->prepare($sql);
     $sth->execute;
     my @results;

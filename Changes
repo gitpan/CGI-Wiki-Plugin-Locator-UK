@@ -1,3 +1,7 @@
+0.08    12 June 2004
+        ->find_within_distance now accepts "lat" and "long" arguments.
+          Internally everything is still done in terms of OS X and Y.
+
 0.07    3 September 2003
         Fixed bug in ->find_within_distance where nodes with identical
           co-ords weren't being returned.
