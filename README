@@ -53,16 +53,19 @@ METHODS
           my $distance = $locator->distance( from_node => "Jerusalem Tavern",
                                              to_node   => "Calthorpe Arms" );
 
-          # Or in metres.
-          my $distance = $locator->distance(from_node => "Angel Station",
+          # Or in metres between a node and a point.
+          my $distance = $locator->distance(from_os_x => 531467,
+                                            from_os_y => 183246,
                                             to_node   => "Duke of Cambridge",
                                             unit      => "metres" );
 
         Defaults to kilometres if "unit" is not supplied or is not
         recognised. Recognised units at the moment: "metres", "kilometres".
 
-        Returns "undef" if one of the nodes does not exist, or does not have
-        both co-ordinates defined.
+        Returns "undef" if one of the endpoints does not exist, or does not
+        have both co-ordinates defined. The "node" specification of an
+        endpoint overrides the x/y co-ords if both specified (but don't do
+        that).
 
         Note: Works to the nearest metre. Well, actually, calls "int" and
         rounds down, but if anyone cares about that they can send a patch.
@@ -72,7 +75,14 @@ METHODS
           my @others = $locator->find_within_distance( node   => "Albion",
                                                        metres => 200 );
 
-        Units currently understood: "metres", "kilometres".
+          # Or within 200 metres of a given location.
+          my @things = $locator->find_within_distance( os_x => 530774,
+                                                       os_y => 182260,
+                                                       metres => 200 );
+
+        Units currently understood: "metres", "kilometres". If both "node"
+        and "os_x"/"os_y" are supplied then "node" takes precedence. Croaks
+        if insufficient start point data supplied.
 
 SEE ALSO
         * CGI::Wiki

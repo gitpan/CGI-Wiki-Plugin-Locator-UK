@@ -4,7 +4,7 @@ use CGI::Wiki::TestConfig::Utilities;
 use CGI::Wiki;
 
 use Test::More tests =>
-  (1 + 16 * $CGI::Wiki::TestConfig::Utilities::num_stores);
+  (1 + 20 * $CGI::Wiki::TestConfig::Utilities::num_stores);
 
 use_ok( "CGI::Wiki::Plugin::Locator::UK" );
 
@@ -13,7 +13,7 @@ my %stores = CGI::Wiki::TestConfig::Utilities->stores;
 my ($store_name, $store);
 while ( ($store_name, $store) = each %stores ) {
     SKIP: {
-      skip "$store_name storage backend not configured for testing", 16
+      skip "$store_name storage backend not configured for testing", 20
           unless $store;
 
       print "#\n##### TEST CONFIG: Store: $store_name\n#\n";
@@ -47,13 +47,18 @@ while ( ($store_name, $store) = each %stores ) {
       is( $distance, undef, "...or if one node does not exist" );
 
       # All things within a given distance.
-print "# " . $locator->distance( from_node => "Duke of Cambridge",
-                                 to_node   => "Albion" ) . "\n";
+      print "# " . $locator->distance( from_node => "Duke of Cambridge",
+                                       to_node   => "Albion" ) . "\n";
 
       my @close = $locator->find_within_distance( node   => "Albion",
                                                   metres => 1000 );
       is_deeply( [ sort @close ], [ "Duke of Cambridge" ],
                  "find_within_distance works as expected on London data" );
+
+      @close = $locator->find_within_distance( node   => "Albion",
+                                               kilometres => 1 );
+      is_deeply( [ sort @close ], [ "Duke of Cambridge" ],
+                 "...with distances specified in km rather than metres too" );
 
       my @unit = $locator->find_within_distance( node    => "11",
                                                  metres  => 1000 );
@@ -62,6 +67,25 @@ print "# " . $locator->distance( from_node => "Duke of Cambridge",
       ok( defined $unit_hash{"21"}, "and on test grid finds things it should");
       ok( ! defined $unit_hash{"22"}, "...and not corner points" );
 
+      ##### distance with start/end point as co-ords
+      $distance = $locator->distance(from_os_x => 531467,
+                                     from_os_y => 183246,
+                                     to_node   => "Duke of Cambridge",
+			             unit      => "metres" );
+      is( $distance, 547, "->distance works with start point as co-ords" );
+
+      $distance = $locator->distance(from_node => "Duke of Cambridge",
+                                     to_os_x   => 531206,
+                                     to_os_y   => 183965,
+                                     unit      => "metres" );
+      is( $distance, 954, "...and with end point as co-ords" );
+
+      ##### find_within_distance with start point as co-ords
+      my @things = $locator->find_within_distance( os_x => 530774,
+                                                   os_y => 182260,
+                                                   metres => 400 );
+      is_deeply( \@things, [ "Calthorpe Arms" ],
+                 "->find_within_distance works with start point as co-ords" );
 
       ##### Check that we're accessing the *latest* data.
       my %node_data = $wiki->retrieve_node( "Calthorpe Arms" );

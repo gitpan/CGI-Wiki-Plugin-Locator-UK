@@ -3,7 +3,7 @@ package CGI::Wiki::Plugin::Locator::UK;
 use strict;
 
 use vars qw( $VERSION @ISA );
-$VERSION = '0.05';
+$VERSION = '0.06';
 
 use Carp qw( croak );
 use CGI::Wiki::Plugin;
@@ -95,16 +95,19 @@ sub coordinates {
   my $distance = $locator->distance( from_node => "Jerusalem Tavern",
                                      to_node   => "Calthorpe Arms" );
 
-  # Or in metres.
-  my $distance = $locator->distance(from_node => "Angel Station",
+  # Or in metres between a node and a point.
+  my $distance = $locator->distance(from_os_x => 531467,
+                                    from_os_y => 183246,
 				    to_node   => "Duke of Cambridge",
 				    unit      => "metres" );
 
 Defaults to kilometres if C<unit> is not supplied or is not recognised.
 Recognised units at the moment: C<metres>, C<kilometres>.
 
-Returns C<undef> if one of the nodes does not exist, or does not have
-both co-ordinates defined.
+Returns C<undef> if one of the endpoints does not exist, or does not
+have both co-ordinates defined. The C<node> specification of an
+endpoint overrides the x/y co-ords if both specified (but don't do
+that).
 
 B<Note:> Works to the nearest metre. Well, actually, calls C<int> and
 rounds down, but if anyone cares about that they can send a patch.
@@ -115,12 +118,21 @@ sub distance {
     my ($self, %args) = @_;
 
     $args{unit} ||= "kilometres";
-    my $from_node = $args{from_node} or return undef;
-    my $to_node   = $args{to_node}   or return undef;
+    my (@from, @to);
 
-    my @from = $self->coordinates( node => $from_node );
-    my @to   = $self->coordinates( node => $to_node );
-    $_ or return undef foreach @from, @to;
+    if ( $args{from_node} ) {
+        @from = $self->coordinates( node => $args{from_node} );
+    } elsif ( $args{from_os_x} and $args{from_os_y} ) {
+        @from = @args{ qw( from_os_x from_os_y ) };
+    }
+
+    if ( $args{to_node} ) {
+        @to = $self->coordinates( node => $args{to_node} );
+    } elsif ( $args{to_os_x} and $args{to_os_y} ) {
+        @to = @args{ qw( to_os_x to_os_y ) };
+    }
+
+    return undef unless ( $from[0] and $from[1] and $to[0] and $to[1] );
 
     my $metres = int( sqrt(   ($from[0] - $to[0])**2
                             + ($from[1] - $to[1])**2 ) + 0.5 );
@@ -138,7 +150,14 @@ sub distance {
   my @others = $locator->find_within_distance( node   => "Albion",
                                                metres => 200 );
 
-Units currently understood: C<metres>, C<kilometres>.
+  # Or within 200 metres of a given location.
+  my @things = $locator->find_within_distance( os_x => 530774,
+                                               os_y => 182260,
+                                               metres => 200 );
+
+Units currently understood: C<metres>, C<kilometres>. If both C<node>
+and C<os_x>/C<os_y> are supplied then C<node> takes precedence. Croaks
+if insufficient start point data supplied.
 
 =cut
 
@@ -151,7 +170,14 @@ sub find_within_distance {
     my $metres = $args{metres}
                || ($args{kilometres} * 1000)
                || croak "Please supply a distance";
-    my ($sx, $sy) = $self->coordinates( node => $args{node} );
+    my ($sx, $sy);
+    if ( $args{node} ) {
+        ($sx, $sy) = $self->coordinates( node => $args{node} );
+    } elsif ( $args{os_x} and $args{os_y} ) {
+        ($sx, $sy) = @args{ qw( os_x os_y ) };
+    } else {
+        croak "Insufficient start location data supplied";
+    }
 
     # Only consider nodes within the square containing the circle of
     # radius $distance.  The SELECT DISTINCT is needed because we might
@@ -164,20 +190,23 @@ sub find_within_distance {
             . "   AND x.metadata_value <= " . ($sx + $metres)
             . "   AND y.metadata_value >= " . ($sy - $metres)
             . "   AND y.metadata_value <= " . ($sy + $metres)
-            . "   AND x.node = y.node "
-            . "   AND x.node != " . $dbh->quote($args{node});
+            . "   AND x.node = y.node";
+    $sql .= "     AND x.node != " . $dbh->quote($args{node})
+        if $args{node};
     # Postgres is a fussy bugger.
     if ( ref $store eq "CGI::Wiki::Store::Pg" ) {
         $sql =~ s/metadata_value/metadata_value::integer/gs;
     }
+
     my $sth = $dbh->prepare($sql);
     $sth->execute;
     my @results;
     while ( my ($result) = $sth->fetchrow_array ) {
-        my $dist = $self->distance( from_node => $args{node},
+        my $dist = $self->distance( from_os_x => $sx,
+                                    from_os_y => $sy,
 				    to_node   => $result,
 				    unit      => "metres" );
-        if ($dist && $dist <= $args{metres} ) {
+        if ($dist && $dist <= $metres ) {
             push @results, $result;
 	}
     }

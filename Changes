@@ -1,3 +1,9 @@
+0.06    9 May 2003
+        ->find_within_distance can now optionally take "os_x" and "os_y"
+          arguments as an alternative to the "node" argument.
+        Also fixed bug where find_within_distance didn't work properly if
+          you specified the distance in kilometres.
+
 0.05    9 May 2003
         Changed to inherit from CGI::Wiki::Plugin - you don't now do
 
