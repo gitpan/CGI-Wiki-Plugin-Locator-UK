@@ -3,7 +3,7 @@ package CGI::Wiki::Plugin::Locator::UK;
 use strict;
 
 use vars qw( $VERSION );
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 use Carp qw( croak );
 
