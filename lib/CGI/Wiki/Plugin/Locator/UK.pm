@@ -3,7 +3,7 @@ package CGI::Wiki::Plugin::Locator::UK;
 use strict;
 
 use vars qw( $VERSION );
-$VERSION = '0.01';
+$VERSION = '0.02';
 
 use Carp qw( croak );
 
@@ -162,23 +162,22 @@ sub find_within_distance {
     my ($sx, $sy) = $self->coordinates( node => $args{node} );
 
     # Only consider nodes within the square containing the circle of
-    # radius $distance.  Also join with the 'node' table (a) so we
-    # only pick up each node once even if it has multiple versions
-    # and (b) so we can avoid the warning caused by CGI::Wiki not deleting
-    # metadata when it deletes a node. (When (b) is fixed in CGI::Wiki we
-    # can probably just do a SELECT DISTINCT.)
-    my $sql = "SELECT x.node
-                FROM metadata AS x, metadata AS y, node
+    # radius $distance.  The SELECT DISTINCT is needed because we might
+    # have multiple versions in the table.
+    my $sql = "SELECT DISTINCT x.node
+                FROM metadata AS x, metadata AS y
                 WHERE x.metadata_type = 'os_x'
                   AND y.metadata_type = 'os_y'
                   AND x.metadata_value >= " . ($sx - $metres)
-	    . "   AND x.metadata_value <= " . ($sx + $metres)
+            . "   AND x.metadata_value <= " . ($sx + $metres)
             . "   AND y.metadata_value >= " . ($sy - $metres)
-	    . "   AND y.metadata_value <= " . ($sy + $metres)
-            . "   AND x.node = node.name "
-            . "   AND x.version = node.version AND y.version = node.version "
+            . "   AND y.metadata_value <= " . ($sy + $metres)
             . "   AND x.node = y.node "
             . "   AND x.node != " . $dbh->quote($args{node});
+    # Postgres is a fussy bugger.
+    if ( ref $store eq "CGI::Wiki::Store::Pg" ) {
+        $sql =~ s/metadata_value/metadata_value::integer/gs;
+    }
     my $sth = $dbh->prepare($sql);
     $sth->execute;
     my @results;
@@ -219,8 +218,9 @@ under the same terms as Perl itself.
 =head1 CREDITS
 
 Nicholas Clark found a very silly bug in a pre-release version, oops
-:)  Stephen White got me thinking in the right way to implement
-C<find_within_distance>.
+:) Stephen White got me thinking in the right way to implement
+C<find_within_distance>. Marcel Gruenauer helped me make
+C<find_within_distance> work properly with postgres.
 
 =cut
 

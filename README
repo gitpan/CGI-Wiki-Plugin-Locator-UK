@@ -93,5 +93,6 @@ COPYRIGHT
 CREDITS
         Nicholas Clark found a very silly bug in a pre-release version, oops
         :) Stephen White got me thinking in the right way to implement
-        "find_within_distance".
+        "find_within_distance". Marcel Gruenauer helped me make
+        "find_within_distance" work properly with postgres.
 

@@ -95,14 +95,14 @@ print "# " . $locator->distance( from_node => "Duke of Cambridge",
       # ...within given distance
       @close = $locator->find_within_distance( node   => "Jerusalem Tavern",
 					       metres => 1000 );
-      print " # Found near JT: " . join(", ", @close) . "\n";
+      print "# Found near JT: " . join(", ", @close) . "\n";
       my %close_hash = map { $_ => 1 } @close;
       ok( ! defined $close_hash{"Calthorpe Arms"},
 	  "...as does ->find_within_distance, for things which used to be close enough but now aren't" );
 
       @close = $locator->find_within_distance( node   => "Duke of Cambridge",
 					       metres => 125 );
-      print " # Found near DoC: " . join(", ", @close) . "\n";
+      print "# Found near DoC: " . join(", ", @close) . "\n";
       %close_hash = map { $_ => 1 } @close;
       ok( defined $close_hash{"Calthorpe Arms"},
 	  "...and for things which didn't use to be close enough but now are");
@@ -110,7 +110,7 @@ print "# " . $locator->distance( from_node => "Duke of Cambridge",
       # Check that we only get things once.
       @close = $locator->find_within_distance( node   => "Duke of Cambridge",
 					       metres => 1250 );
-      print " # Found: " . join(", ", @close) . "\n";
+      print "# Found: " . join(", ", @close) . "\n";
       my @dupes = grep { /Calthorpe Arms/ } @close;
       is( scalar @dupes, 1,
 	  "...and only picks things up once, even if multiple versions exist");
@@ -119,7 +119,7 @@ print "# " . $locator->distance( from_node => "Duke of Cambridge",
       $wiki->delete_node("Calthorpe Arms");
       @close = $locator->find_within_distance( node   => "Duke of Cambridge",
 					       metres => 125 );
-      print " # Found near DoC: " . join(", ", @close) . "\n";
+      print "# Found near DoC: " . join(", ", @close) . "\n";
       is( scalar @close, 0, "...and doesn't pick up deleted nodes" );
 
       # Check things with no co-ordinates don't get treated as being at
