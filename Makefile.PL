@@ -2,7 +2,7 @@ use ExtUtils::MakeMaker;
 
 WriteMakefile( NAME         => "CGI::Wiki::Plugin::Locator::UK",
 	       VERSION_FROM => "lib/CGI/Wiki/Plugin/Locator/UK.pm",
-	       PREREQ_PM    => { 'CGI::Wiki' => 0.27, # for init testutils
+	       PREREQ_PM    => { 'CGI::Wiki' => 0.36, # for Plugin base class
 			         'Test::More' => 0,
 				 'Carp' => 0
                                },

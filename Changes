@@ -1,3 +1,13 @@
+0.05    9 May 2003
+        Changed to inherit from CGI::Wiki::Plugin - you don't now do
+
+          my $locator = CGI::Wiki::Plugin::Locator::UK->new( wiki => $wiki );
+
+        but
+
+          my $locator = CGI::Wiki::Plugin::Locator::UK->new;
+          $wiki->register_plugin( plugin => $locator );
+
 0.04    5 April 2003
         Finally remembered to add the Changes file to the MANIFEST.
 

@@ -4,15 +4,9 @@ use CGI::Wiki::TestConfig::Utilities;
 use CGI::Wiki;
 
 use Test::More tests =>
-  (3 + 16 * $CGI::Wiki::TestConfig::Utilities::num_stores);
+  (1 + 16 * $CGI::Wiki::TestConfig::Utilities::num_stores);
 
 use_ok( "CGI::Wiki::Plugin::Locator::UK" );
-
-eval { my $loc = CGI::Wiki::Plugin::Locator::UK->new; };
-ok( $@, "croaks if no wiki object supplied" );
-
-eval { my $loc = CGI::Wiki::Plugin::Locator::UK->new( wiki => "foo" ); };
-ok( $@, "croaks if something that isn't a wiki object supplied" );
 
 my %stores = CGI::Wiki::TestConfig::Utilities->stores;
 
@@ -25,9 +19,10 @@ while ( ($store_name, $store) = each %stores ) {
       print "#\n##### TEST CONFIG: Store: $store_name\n#\n";
 
       my $wiki = CGI::Wiki->new( store => $store );
-      my $locator = eval {CGI::Wiki::Plugin::Locator::UK->new(wiki => $wiki);};
-      is( $@, "", "'new' doesn't croak if wiki object supplied" );
+      my $locator = eval { CGI::Wiki::Plugin::Locator::UK->new; };
+      is( $@, "", "'new' doesn't croak" );
       isa_ok( $locator, "CGI::Wiki::Plugin::Locator::UK" );
+      $wiki->register_plugin( plugin => $locator );
 
       # Co-ordinates.
       my ( $x, $y ) = $locator->coordinates( node => "Jerusalem Tavern"   );

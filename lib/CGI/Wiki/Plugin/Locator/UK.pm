@@ -2,10 +2,13 @@ package CGI::Wiki::Plugin::Locator::UK;
 
 use strict;
 
-use vars qw( $VERSION );
-$VERSION = '0.04';
+use vars qw( $VERSION @ISA );
+$VERSION = '0.05';
 
 use Carp qw( croak );
+use CGI::Wiki::Plugin;
+
+@ISA = qw( CGI::Wiki::Plugin );
 
 =head1 NAME
 
@@ -27,8 +30,9 @@ L<CGI::Wiki>.
   use CGI::Wiki;
   use CGI::Wiki::Plugin::Locator::UK;
 
-  my $wiki = CGI::Wiki->new;
-  my $locator = CGI::Wiki::Plugin::Locator::UK->new( wiki => $wiki );
+  my $wiki = CGI::Wiki->new( ... );
+  my $locator = CGI::Wiki::Plugin::Locator::UK->new;
+  $wiki->register_plugin( $locator );
 
   $wiki->write_node( "Jerusalem Tavern",
                      "A good pub",
@@ -55,9 +59,7 @@ L<CGI::Wiki>.
 
 =item B<new>
 
-  my $locator = CGI::Wiki::Plugin::Locator::UK->new( wiki => $wiki );
-
-Mandatory argument - a CGI::Wiki object.
+  my $locator = CGI::Wiki::Plugin::Locator::UK->new;
 
 =cut
 
@@ -65,16 +67,6 @@ sub new {
     my ($class, @args) = @_;
     my $self = {};
     bless $self, $class;
-    return $self->_init(@args);
-}
-
-sub _init {
-    my ($self, %args) = @_;
-    my $wiki = $args{wiki};
-    unless ( $wiki && UNIVERSAL::isa( $wiki, "CGI::Wiki" ) ) {
-        croak "No CGI::Wiki object supplied.";
-    }
-    $self->{wiki} = $wiki;
     return $self;
 }
 
@@ -89,10 +81,10 @@ node was written.
 
 sub coordinates {
     my ($self, %args) = @_;
-    my $wiki = $self->{wiki};
+    my $store = $self->datastore;
     # This is the slightly inefficient but neat and tidy way to do it -
     # calling on as much existing stuff as possible.
-    my %node_data = $wiki->retrieve_node( $args{node} );
+    my %node_data = $store->retrieve_node( $args{node} );
     my %metadata  = %{$node_data{metadata}};
     return ($metadata{os_x}[0], $metadata{os_y}[0]);
 }
@@ -153,7 +145,7 @@ Units currently understood: C<metres>, C<kilometres>.
 sub find_within_distance {
     my ($self, %args) = @_;
 
-    my $store = $self->{wiki}->store;
+    my $store = $self->datastore;
     my $dbh = eval { $store->dbh; }
       or croak "find_within_distance is only implemented for database stores";
     my $metres = $args{metres}

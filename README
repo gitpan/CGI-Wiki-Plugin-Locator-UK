@@ -15,8 +15,9 @@ SYNOPSIS
       use CGI::Wiki;
       use CGI::Wiki::Plugin::Locator::UK;
 
-      my $wiki = CGI::Wiki->new;
-      my $locator = CGI::Wiki::Plugin::Locator::UK->new( wiki => $wiki );
+      my $wiki = CGI::Wiki->new( ... );
+      my $locator = CGI::Wiki::Plugin::Locator::UK->new;
+      $wiki->register_plugin( $locator );
 
       $wiki->write_node( "Jerusalem Tavern",
                          "A good pub",
@@ -39,9 +40,7 @@ SYNOPSIS
 
 METHODS
     new
-          my $locator = CGI::Wiki::Plugin::Locator::UK->new( wiki => $wiki );
-
-        Mandatory argument - a CGI::Wiki object.
+          my $locator = CGI::Wiki::Plugin::Locator::UK->new;
 
     coordinates
           my ($x, $y) = $locator->coordinates( node => "Jerusalem Tavern" );
