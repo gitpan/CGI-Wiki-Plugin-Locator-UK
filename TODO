@@ -1,0 +1,5 @@
+
+ - doesn't currently check in the SQL of ->find_within_distance that it's
+   looking at the latest version
+
+ - need to find a good explanation of British National Grid for a SEE ALSO
