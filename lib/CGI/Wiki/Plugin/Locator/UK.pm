@@ -3,7 +3,7 @@ package CGI::Wiki::Plugin::Locator::UK;
 use strict;
 
 use vars qw( $VERSION @ISA );
-$VERSION = '0.08';
+$VERSION = '0.09';
 
 use Carp qw( croak );
 use CGI::Wiki::Plugin;
@@ -103,6 +103,12 @@ sub coordinates {
 				    to_node   => "Duke of Cambridge",
 				    unit      => "metres" );
 
+  # Or specify the point via latitude and longitude.
+  my $distance = $locator->distance(from_lat  => 51.53,
+                                    from_long => -0.1,
+				    to_node   => "Duke of Cambridge",
+				    unit      => "metres" );
+
 Defaults to kilometres if C<unit> is not supplied or is not recognised.
 Recognised units at the moment: C<metres>, C<kilometres>.
 
@@ -126,6 +132,12 @@ sub distance {
         @from = $self->coordinates( node => $args{from_node} );
     } elsif ( $args{from_os_x} and $args{from_os_y} ) {
         @from = @args{ qw( from_os_x from_os_y ) };
+    } elsif ( $args{from_lat} and $args{from_long} ) {
+        my $point = Geography::NationalGrid::GB->new(
+                                                 Latitude  => $args{from_lat},
+                                                 Longitude => $args{from_long},
+                                                    );
+        @from = ( $point->easting, $point->northing );
     }
 
     if ( $args{to_node} ) {

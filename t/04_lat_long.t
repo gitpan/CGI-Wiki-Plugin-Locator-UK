@@ -2,7 +2,7 @@ use strict;
 local $^W = 1;
 use CGI::Wiki::TestConfig::Utilities;
 use vars qw( $num_loop_tests );
-BEGIN { $num_loop_tests = 1; }
+BEGIN { $num_loop_tests = 2; }
 use Test::More tests =>
   (0 + $num_loop_tests * $CGI::Wiki::TestConfig::Utilities::num_stores);
 
@@ -49,6 +49,12 @@ while ( ($store_name, $store) = each %stores ) {
                                                    metres => 400 );
       is_deeply( \@things, [ "Calthorpe Arms" ],
                  "->find_within_distance works with start point as latlong" );
+
+      my $dist = $locator->distance( from_lat  => 51.524975,
+                                     from_long => -0.116250,
+                                     to_node   => "Calthorpe Arms",
+                                     unit      => "metres" );
+      ok( $dist < 400 && $dist > 0, "->distance works with latlong" );
 
     } # end of SKIP
 }

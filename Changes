@@ -1,3 +1,8 @@
+0.09    13 June 2004
+        ->distance now accepts "from_lat" and "from_long" arguments;
+          use these in combination with "to_node".
+          Internally everything is still done in terms of OS X and Y.
+
 0.08    12 June 2004
         ->find_within_distance now accepts "lat" and "long" arguments.
           Internally everything is still done in terms of OS X and Y.
